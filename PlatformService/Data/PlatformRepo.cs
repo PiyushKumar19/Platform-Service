@@ -12,7 +12,12 @@ namespace PlatformService.Data
         }
         public void CreatePlatform(Platform platform)
         {
-            throw new NotImplementedException();
+            if (platform == null)
+            {
+                throw new ArgumentNullException(nameof(platform));
+            }
+            dbContext.Platform.Add(platform);
+            SaveChanges();
         }
 
         public IEnumerable<Platform> GetAllPlatforms()
