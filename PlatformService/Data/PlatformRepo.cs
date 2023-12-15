@@ -17,7 +17,6 @@ namespace PlatformService.Data
                 throw new ArgumentNullException(nameof(platform));
             }
             dbContext.Platform.Add(platform);
-            SaveChanges();
         }
 
         public IEnumerable<Platform> GetAllPlatforms()
