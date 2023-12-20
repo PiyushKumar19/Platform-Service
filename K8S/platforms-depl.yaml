@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-depl
+spec: #for pods
+  replicas: 1
+  selector: # this seleects the template with matching app name
+    matchLabels:
+      app: platformservice
+  template: # defining info about pods
+    metadata:
+      labels:
+        app: platformservice
+    spec:
+      containers:
+        - name: platformservice
+          image: kumarpiyush21/platformservice:latest
