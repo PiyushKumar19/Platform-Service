@@ -21,7 +21,12 @@ namespace PlatformService.Data
 
         public IEnumerable<Platform> GetAllPlatforms()
         {
-            return dbContext.Platform.ToList();
+            var platforms = dbContext.Platform.ToList();
+            if (platforms != null)
+            {
+                return platforms;
+            }
+            return null;
         }
 
         public Platform GetPlatfomrById(int id)
