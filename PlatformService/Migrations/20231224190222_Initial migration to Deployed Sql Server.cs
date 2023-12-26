@@ -5,7 +5,7 @@
 namespace PlatformService.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCommit : Migration
+    public partial class InitialmigrationtoDeployedSqlServer : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

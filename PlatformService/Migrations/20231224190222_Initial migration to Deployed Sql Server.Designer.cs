@@ -11,8 +11,8 @@ using PlatformService.Data;
 namespace PlatformService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231215152523_InitialCommit")]
-    partial class InitialCommit
+    [Migration("20231224190222_Initial migration to Deployed Sql Server")]
+    partial class InitialmigrationtoDeployedSqlServer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

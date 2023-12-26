@@ -1,32 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: platforms-depl
+  name: commands-depl
 spec: #for pods
   replicas: 1 #Kubernetes will ensure that 1 container replica is running
   selector: # this seleects the template with matching app name
     matchLabels:
-      app: platformservice
+      app: commandservice
   template: # defining info about pods
     metadata:
       labels:
-        app: platformservice
+        app: commandservice
     spec:
       containers:
-        - name: platformservice
-          image: kumarpiyush21/platformservice:latest
+        - name: commandservice
+          image: kumarpiyush21/commandsservice:latest
 ---
 # Cluster IP service config
 apiVersion: v1
 kind: Service
 metadata: 
-  name: platforms-clusterip-srv
+  # Also used as domain like localhost in PlatformService-appsettings.Production.json
+  name: commands-clusterip-srv 
 spec:
   type: ClusterIP
   selector:
-    app: platformservice
+    app: commandservice
   ports:
-    - name: platformservice
+    - name: commandservice
       protocol: TCP
       port: 80
       targetPort: 80
