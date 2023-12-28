@@ -1,12 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using PlatformService.AsyncDataServices;
 using PlatformService.Data;
 using PlatformService.SyncDataServices.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.WebHost.UseUrls("http://*.80");
-builder.WebHost.UseIISIntegration();
 
 var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
 var dbName = Environment.GetEnvironmentVariable("DB_NAME");
@@ -20,6 +19,9 @@ var deployedServerCN = builder.Configuration.GetConnectionString("DeployedConn")
 builder.Services.AddHttpClient<ICommandDataClient, HttpCommandDataClient>();
 if (builder.Environment.IsProduction())
 {
+    builder.WebHost.UseUrls("http://*.80");
+    builder.WebHost.UseIISIntegration();
+
     Console.WriteLine("--> Using deployed SqlServer Db");
     builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseSqlServer(deployedServerCN));
@@ -29,12 +31,15 @@ else
     Console.WriteLine("--> Using local SqlServer Db");
 
     builder.Services.AddDbContext<AppDbContext>(options => 
-    options.UseSqlServer(deployedLocalCN));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultString")));
 }
 
 
 builder.Services.AddScoped<IPlatformRepo, PlatformRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddSingleton<IMessageBusClient, MessageBusClient>();
+
+Console.WriteLine($"--> CommandService Endpoint {builder.Configuration["CommandServiceIIS"]}");
 
 
 builder.Services.AddControllers();

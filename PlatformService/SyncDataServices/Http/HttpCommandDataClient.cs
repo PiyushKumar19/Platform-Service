@@ -21,7 +21,7 @@ namespace PlatformService.SyncDataServices.Http
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await client.PostAsync($"{configuration["CommandService"]}", httpContent);
+            var response = await client.PostAsync($"{configuration.GetSection("CommandServiceHttp")}", httpContent);
             
             if (response.IsSuccessStatusCode)
             {
