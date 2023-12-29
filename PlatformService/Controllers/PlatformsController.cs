@@ -16,16 +16,19 @@ namespace PlatformService.Controllers
         private readonly IMapper mapper;
         private readonly ICommandDataClient commandDataClient;
         private readonly IMessageBusClient messageBusClient;
+        private readonly IConfiguration configuration;
 
         public PlatformsController(IPlatformRepo repo,
         IMapper mapper,
         ICommandDataClient commandDataClient,
-        IMessageBusClient messageBusClient)
+        IMessageBusClient messageBusClient,
+        IConfiguration configuration)
         {
             this.repo = repo;
             this.mapper = mapper;
             this.commandDataClient = commandDataClient;
             this.messageBusClient = messageBusClient;
+            this.configuration = configuration;
         }
 
         [HttpGet]
@@ -80,6 +83,8 @@ namespace PlatformService.Controllers
             }
             catch(Exception ex)
             {
+                Console.WriteLine($"--> CommandService Endpoint {configuration["CommandService"]}");
+
                 Console.WriteLine($"\n--> Could not send data synchronously: {ex.Message}\n");
             }
 

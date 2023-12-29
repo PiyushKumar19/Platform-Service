@@ -23,12 +23,16 @@ if (builder.Environment.IsProduction())
     builder.WebHost.UseIISIntegration();
 
     Console.WriteLine("--> Using deployed SqlServer Db");
+    Console.WriteLine($"--> CommandService Endpoint {builder.Configuration["CommandService"]}");
+
     builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseSqlServer(deployedServerCN));
 }
 else
 {
     Console.WriteLine("--> Using local SqlServer Db");
+
+    Console.WriteLine($"--> CommandService Endpoint {builder.Configuration["CommandService"]}");
 
     builder.Services.AddDbContext<AppDbContext>(options => 
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultString")));
@@ -39,7 +43,6 @@ builder.Services.AddScoped<IPlatformRepo, PlatformRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddSingleton<IMessageBusClient, MessageBusClient>();
 
-Console.WriteLine($"--> CommandService Endpoint {builder.Configuration["CommandServiceIIS"]}");
 
 
 builder.Services.AddControllers();

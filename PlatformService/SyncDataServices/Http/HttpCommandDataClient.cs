@@ -8,11 +8,13 @@ namespace PlatformService.SyncDataServices.Http
     {
         private readonly HttpClient client;
         private readonly IConfiguration configuration;
+        private readonly IHostEnvironment hostEnvironment;
 
-        public HttpCommandDataClient(HttpClient client,  IConfiguration configuration)
+        public HttpCommandDataClient(HttpClient client, IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
             this.client = client;
             this.configuration = configuration;
+            this.hostEnvironment = hostEnvironment;
         }
         public async Task SendPlatformToCommand(PlatformReadDto platform)
         {
@@ -21,15 +23,31 @@ namespace PlatformService.SyncDataServices.Http
                 Encoding.UTF8,
                 "application/json");
 
-            var response = await client.PostAsync($"{configuration.GetSection("CommandServiceHttp")}", httpContent);
-            
-            if (response.IsSuccessStatusCode)
+            if (hostEnvironment.IsProduction())
             {
-                Console.WriteLine("--> Sync POST to CommandService was OK!");
-            }
-            else{
-                Console.WriteLine("--> Sync POST to CommandService was not OK!");
+                var response = await client.PostAsync($"{configuration["CommandService"]}", httpContent);
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("--> Sync POST to CommandService was OK!");
+                }
+                else
+                {
+                    Console.WriteLine("--> Sync POST to CommandService was not OK!");
 
+                }
+            }
+            else
+            {
+                var response = await client.PostAsync($"{configuration["CommandServiceLocal"]}", httpContent);
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("--> Sync POST to CommandService was OK!");
+                }
+                else
+                {
+                    Console.WriteLine("--> Sync POST to CommandService was not OK!");
+
+                }
             }
         }
     }
