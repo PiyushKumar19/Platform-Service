@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CommandsService.Controller
 {
-    [Route("api/c/platforms/{platforms}/[controller]")]
+    [Route("api/c/platforms/{platformId}/[controller]")]
     [ApiController]
     public class CommandsController : ControllerBase
     {
@@ -70,8 +70,8 @@ namespace CommandsService.Controller
             commandRepo.SaveChanges();
 
             var commandReadDto = mapper.Map<CommandReadDto>(command);
-            return CreatedAtAction(nameof(GetCommandForPlatform),
-                new {platformId = platformId, commandId = commandReadDto.Id}, commandReadDto);
+            return CreatedAtRoute(nameof(GetCommandForPlatform),
+                new { platformId = platformId, commandId = commandReadDto.Id }, commandReadDto);
         }
     }
 }

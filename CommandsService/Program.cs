@@ -1,11 +1,17 @@
 using System.Reflection;
+using CommandsService.AsyncDataService;
 using CommandsService.Data;
+using CommandsService.EventProcessing;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+builder.Services.AddHostedService<MessageBusSubscriber>();
+
+builder.Services.AddScoped<IEventProcessor, EventProcessor>();
 builder.Services.AddScoped<ICommandRepo, CommandRepo>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseInMemoryDatabase("InMem"));
@@ -23,6 +29,8 @@ var app = builder.Build();
 if (app.Environment.IsProduction())
 {
     builder.WebHost.UseUrls("http://*.80");
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 // Configure the HTTP request pipeline.
