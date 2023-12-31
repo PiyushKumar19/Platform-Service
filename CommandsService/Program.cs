@@ -1,7 +1,10 @@
+using System.Net;
 using System.Reflection;
 using CommandsService.AsyncDataService;
 using CommandsService.Data;
 using CommandsService.EventProcessing;
+using CommandsService.SyncDataServices.Grpc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,12 +18,14 @@ builder.Services.AddScoped<IEventProcessor, EventProcessor>();
 builder.Services.AddScoped<ICommandRepo, CommandRepo>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseInMemoryDatabase("InMem"));
+builder.Services.AddScoped<IPlatformDataClient, PlatformDataClient>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.WebHost.UseIISIntegration();
+
 
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
@@ -51,7 +56,7 @@ app.MapControllers();
 
 app.MapGet("/weatherforecast", () =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
+    var forecast = Enumerable.Range(1, 5).Select(index =>
         new WeatherForecast
         (
             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
@@ -63,6 +68,8 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast")
 .WithOpenApi();
+
+PrepDb.PrepPopulation(app);
 
 app.Run();
 
