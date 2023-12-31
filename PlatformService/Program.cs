@@ -1,7 +1,12 @@
+using System.Net;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using PlatformService.AsyncDataServices;
 using PlatformService.Data;
+using PlatformService.SyncDataServices.Grpc;
 using PlatformService.SyncDataServices.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +30,7 @@ if (builder.Environment.IsProduction())
     Console.WriteLine("--> Using deployed SqlServer Db");
     Console.WriteLine($"--> CommandService Endpoint {builder.Configuration["CommandService"]}");
 
-    builder.Services.AddDbContext<AppDbContext>(options => 
+    builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(deployedServerCN));
 }
 else
@@ -34,7 +39,7 @@ else
 
     Console.WriteLine($"--> CommandService Endpoint {builder.Configuration["CommandService"]}");
 
-    builder.Services.AddDbContext<AppDbContext>(options => 
+    builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultString")));
 }
 
@@ -42,13 +47,32 @@ else
 builder.Services.AddScoped<IPlatformRepo, PlatformRepo>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddSingleton<IMessageBusClient, MessageBusClient>();
-
+builder.Services.AddGrpc();
 
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.WebHost.ConfigureKestrel(options =>
+            {
+                var grpcPort = 5155;
+                var httpPort = 5121; // just a randowm number
+
+                if (options.ApplicationServices.GetRequiredService<IHostEnvironment>().IsDevelopment())
+                {
+                    options.Listen(IPAddress.Any, httpPort, listenOptions =>
+                    {
+                        listenOptions.Protocols = HttpProtocols.Http1;
+                    });
+
+                    options.Listen(IPAddress.Any, grpcPort, listenOptions =>
+                    {
+                        listenOptions.Protocols = HttpProtocols.Http2;
+                    });
+                }
+            });
 
 var app = builder.Build();
 
@@ -63,9 +87,24 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
 app.UseAuthorization();
 
 app.MapControllers();
+
+#pragma warning disable ASP0014
+app.UseEndpoints(endpoint =>
+{
+    endpoint.MapGrpcService<GrpcPlatformService>();
+    endpoint.MapGet("/protos/platforms.proto", async context =>
+    {
+        await context.Response.WriteAsync(File.ReadAllText("Protos/platforms.proto"));
+    });
+});
+#pragma warning restore ASP0014
+
+
 PrepDb.PrepPopulation(app, app.Environment.IsProduction());
 
 app.Run();

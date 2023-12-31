@@ -43,6 +43,8 @@ namespace CommandsService.AsyncDataService
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            // There was an error regarding IEventProcessor in runtime, solved by using Scope found from ChatGPT
+            //  Chat name - DI Issue: Service Resolution
             using var scope = serviceProvider.CreateScope();
             var scopedService = scope.ServiceProvider.GetRequiredService<IEventProcessor>();
 
